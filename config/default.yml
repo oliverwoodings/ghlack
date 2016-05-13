@@ -1,0 +1,14 @@
+driftwood:
+  enable: false
+poll:
+  eagerInterval: 10
+  defaultInterval: 60
+slack:
+  username: ghlack
+  icon: http://i.imgur.com/wDWgbSl.png
+users:
+  # oli:
+  #   githubToken: foo
+  #   slack:
+  #     hook: bar
+  #     user: oli
