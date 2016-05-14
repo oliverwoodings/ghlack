@@ -6,7 +6,7 @@ const log = createLogger('handleIssue')
 export default async function handleIssue (notification, github) {
   const {
     subject,
-    last_read_at: lastReadAt
+    last_read_at: lastReadAt,
   } = notification
 
   try {
@@ -27,7 +27,7 @@ export default async function handleIssue (notification, github) {
     })
 
     return {
-      text: getTitle(issue),
+      text: getTitle(issue, subject.latest_comment_url),
       attachments
     }
   } catch (e) {
@@ -43,9 +43,16 @@ function formatIssue ({ body, user }) {
   }
 }
 
-function getTitle({ title, html_url }) {
+function getTitle({ title, html_url }, latestCommentUrl) {
+  const [, commentId] = latestCommentUrl.match(/issues\/comments\/(\d+)/) || []
   const [, owner, repo, id ] = html_url.match(/github\.com\/(.+?)\/(.+?)\/issues\/(\d+)/)
-  return `*<${html_url}|[${owner}/${repo}] ${title} (#${id})>*`
+
+  let url = html_url
+  if (commentId) {
+    url += `#issuecomment-${commentId}`
+  }
+
+  return `*<${url}|[${owner}/${repo}] ${title} (#${id})>*`
 }
 
 function getAuthorFromUser ({ login, avatar_url, html_url }) {
