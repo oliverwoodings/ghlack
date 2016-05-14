@@ -58,14 +58,10 @@ export default function createGithubApi (name, token) {
     }
 
     try {
-      const since = lastModified ? moment.utc(lastModified).format() : ''
-      const url = notificationsUrl(since)
-
-      log.debug(`Calling notifications endpoint: ${url}`)
-      const res = await axios.get(url, { headers })
+      const res = await axios.get(notificationsUrl(), { headers })
 
       const pollInterval = getPollInterval(res)
-      const lastModifiedResponse = res.headers['last-modified']
+      const lastModifiedResponse = res.headers['last-modified'] || res.headers['date']
 
       return {
         notifications: res.data,
@@ -79,6 +75,7 @@ export default function createGithubApi (name, token) {
       }
 
       let pollInterval = config.poll.defaultInterval
+      const lastModifiedResponse = res.headers['last-modified'] || res.headers['date']
 
       if (res.status === 304) {
         pollInterval = getPollInterval(res)
@@ -87,7 +84,7 @@ export default function createGithubApi (name, token) {
         log.error(`Got a weird response from GitHub: ${res.status} ${res.statusText}`)
       }
 
-      return { pollInterval }
+      return { pollInterval, lastModifiedResponse }
     }
   }
 
@@ -109,7 +106,7 @@ export default function createGithubApi (name, token) {
     log.debug(`Marking notifications as read`)
 
     try {
-      await axios.put(notificationsUrl(''), {}, { headers })
+      await axios.put(notificationsUrl(), {}, { headers })
     } catch (e) {
       log.error('Unable to mark notifications as read')
       console.log(e)

@@ -9,6 +9,7 @@ export default function pollUser (name, config) {
   const slack = createSlackApi(config.slack)
   const github = createGithubApi(name, config.githubToken)
 
+  github.markAsRead()
   poll()
 
   async function poll () {

@@ -22,8 +22,10 @@ export default function handleNotifications (notifications, github, slack) {
     }
 
     log.debug(`Handling notification type ${type}`)
-    const messages = await handler(notification, github)
+    const message = await handler(notification, github)
 
-    each(messages, slack.send)
+    if (message) {
+      slack.send(message)
+    }
   })
 }

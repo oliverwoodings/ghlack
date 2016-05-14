@@ -1,5 +1,5 @@
-export function notificationsUrl (since) {
-  return `https://api.github.com/notifications?since=${since}`
+export function notificationsUrl () {
+  return `https://api.github.com/notifications`
 }
 
 export function commitCommentsUrl (owner, repo, red) {
