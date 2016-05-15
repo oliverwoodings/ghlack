@@ -53,11 +53,11 @@ export default function handleEvents (events, slack) {
   })
 }
 
-function getAuthor ({ login, avatar_url, url }) {
+function getAuthor ({ login, avatar_url: avatarUrl, url }) {
   return {
     author_name: login,
     author_link: url,
-    author_icon: `${avatar_url}&s=16`
+    author_icon: `${avatarUrl}&s=16`
   }
 }
 

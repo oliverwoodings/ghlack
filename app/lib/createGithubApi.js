@@ -1,4 +1,4 @@
-import { filter, get } from 'lodash'
+import { filter } from 'lodash'
 import config from 'config'
 import invariant from 'invariant'
 import axios from 'axios'
@@ -18,7 +18,7 @@ export default function createGithubApi (name, token) {
     })
 
     async function waitForEvents (resolve) {
-      log.debug(`Getting events`)
+      log.debug('Getting events')
 
       let {
         events,

@@ -1,15 +1,15 @@
 export default function commitComment ({ payload, repo }) {
   const {
-    html_url,
-    commit_id,
+    html_url: htmlUrl,
+    commit_id: commitId,
     path,
     body
   } = payload.comment
 
-  const message = `_In <${html_url}|${path}>:_\n${body}`
+  const message = `_In <${htmlUrl}|${path}>:_\n${body}`
 
-  const titleUrl = `https://github.com/${repo.name}/commit/${commit_id}`
-  const title = `*<${titleUrl}|[${repo.name}] ${commit_id}>*`
+  const titleUrl = `https://github.com/${repo.name}/commit/${commitId}`
+  const title = `*<${titleUrl}|[${repo.name}] ${commitId}>*`
 
   return {
     title,

@@ -7,19 +7,19 @@ export default function issue ({ payload, repo }) {
   } = payload
 
   const {
-    html_url,
+    html_url: htmlUrl,
     title: issueTitle,
     number,
     body
   } = issue
 
-  const title = `*<${html_url}|[${repo.name}] ${issueTitle} (#${number})>*`
+  const title = `*<${htmlUrl}|[${repo.name}] ${issueTitle} (#${number})>*`
 
   let message
   if (action === 'opened') {
     message = body || '_No description provided._'
   } else {
-    message = `${startCase(action)} <${html_url}|#${number}>`
+    message = `${startCase(action)} <${htmlUrl}|#${number}>`
   }
 
   return {

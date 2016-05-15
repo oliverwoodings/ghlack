@@ -1,7 +1,6 @@
 export default function issueComment ({ payload, repo }) {
   const {
-    id,
-    html_url,
+    html_url: htmlUrl,
     body
   } = payload.comment
 
@@ -10,7 +9,7 @@ export default function issueComment ({ payload, repo }) {
     number
   } = payload.issue
 
-  const title = `*<${html_url}|[${repo.name}] ${issueTitle} (#${number})>*`
+  const title = `*<${htmlUrl}|[${repo.name}] ${issueTitle} (#${number})>*`
 
   return {
     title,

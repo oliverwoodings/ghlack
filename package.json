@@ -34,5 +34,8 @@
     "lodash": "^4.12.0",
     "nodemon": "^1.9.2",
     "standard": "^7.0.1"
+  },
+  "standard": {
+    "parser": "babel-eslint"
   }
 }

@@ -13,7 +13,7 @@ export default function createSlackApi ({ hook, channel }) {
       text,
       channel,
       username: config.slack.username,
-      attachments 
+      attachments
     })
   }
 

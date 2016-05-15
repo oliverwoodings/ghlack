@@ -1,0 +1,19 @@
+{
+  "apps" : [{
+    "name": "ghlack",
+    "script": "index.js",
+    "env_production": {
+      "NODE_ENV": "production"
+    }
+  }],
+  "deploy": {
+    "production": {
+      "user": "root",
+      "host": "owoodings.net",
+      "ref": "origin/master",
+      "repo": "git@github.com:oliverwoodings/ghlack.git",
+      "path": "~/apps/ghlack",
+      "post-deploy" : "make bootstrap && pm2 startOrRestart ecosystem.json --env production"
+    }
+  }
+}

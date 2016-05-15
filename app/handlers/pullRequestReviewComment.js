@@ -3,9 +3,9 @@ export default function pullRequestReviewComment ({ payload, repo }) {
     id,
     html_url: commentUrl,
     path,
-    diff_hunk,
+    diff_hunk: diffHunk,
     body,
-    commit_id
+    commit_id: commitId
   } = payload.comment
 
   const {
@@ -14,9 +14,9 @@ export default function pullRequestReviewComment ({ payload, repo }) {
     number
   } = payload.pull_request
 
-  const message = `_In <${commentUrl}|${path}>:_\n\`\`\`${diff_hunk}\`\`\`\n${body}`
+  const message = `_In <${commentUrl}|${path}>:_\n\`\`\`${diffHunk}\`\`\`\n${body}`
 
-  const titleUrl = `${prUrl}/files/${commit_id}#r${id}`
+  const titleUrl = `${prUrl}/files/${commitId}#r${id}`
   const title = `*<${titleUrl}|[${repo.name}] ${prTitle} (#${number})>*`
 
   return {
