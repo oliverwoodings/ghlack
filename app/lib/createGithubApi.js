@@ -31,7 +31,7 @@ export default function createGithubApi (name, token) {
         pollInterval = config.poll.eagerInterval
       }
 
-      if (etag) {
+      if (etag && etag !== previousEtag) {
         log.debug(`Updating etag cache to ${etag}`)
         previousEtag = etag
       }

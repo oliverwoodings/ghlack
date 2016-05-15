@@ -6,8 +6,7 @@ poll:
   eagerInterval: 30
   defaultInterval: 60
 slack:
-  username: ghlack
-  icon: http://i.imgur.com/wDWgbSl.png
+  username: ghlack-dev
 users:
   # oliverwoodings:
   #   githubToken: foo
