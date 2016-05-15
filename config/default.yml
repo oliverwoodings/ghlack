@@ -1,5 +1,7 @@
 driftwood:
-  enable: false
+  enable: true
+  levels:
+    '*': trace
 poll:
   eagerInterval: 30
   defaultInterval: 60

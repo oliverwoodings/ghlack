@@ -1,4 +1,0 @@
-driftwood:
-  enable: true
-  levels:
-    '*': trace
