@@ -1,83 +1,88 @@
-import { filter } from 'lodash'
+import { filter, get } from 'lodash'
 import config from 'config'
 import invariant from 'invariant'
-import moment from 'moment'
 import axios from 'axios'
 import createLogger from '../log'
-import { notificationsUrl, eventsUrl } from '../urls'
 
 export default function createGithubApi (name, token) {
   invariant(!!token, 'GitHub token required')
 
   const log = createLogger(`githubApi:${name}`)
 
-  let lastModified = null
-  let eventsEtag = null
+  let lastEventId
+  let previousEtag
 
-  async function getNewNotifications () {
+  async function getNewEvents () {
     return new Promise((resolve) => {
-      waitForNotifications(resolve)
+      waitForEvents(resolve)
     })
 
-    async function waitForNotifications (resolve) {
-      log.debug(`Getting notifications`)
+    async function waitForEvents (resolve) {
+      log.debug(`Getting events`)
 
       let {
-        notifications,
+        events,
         pollInterval,
-        lastModifiedResponse
-      } = await getNotifications()
+        etag
+      } = await getEvents()
 
       // If we are just getting the default interval back (60s) lets try eager polling
       if (pollInterval === config.poll.defaultInterval) {
         pollInterval = config.poll.eagerInterval
       }
 
-      const previousLastModified = lastModified
-
-      if (lastModifiedResponse) {
-        log.debug(`Updating last modified cache to ${lastModifiedResponse}`)
-        lastModified = parseModifiedHeader(lastModifiedResponse)
+      if (etag) {
+        log.debug(`Updating etag cache to ${etag}`)
+        previousEtag = etag
       }
 
-      if (notifications && notifications.length > 0 && !!previousLastModified) {
+      const newEvents = filter(events, (event) => {
+        return !lastEventId || event.id > lastEventId
+      })
+
+      if (lastEventId && newEvents.length > 0) {
         resolve({
           pollInterval,
-          notifications: notifications
+          events: newEvents
         })
-        return
+      } else {
+        log.debug(`No new events found, trying again in ${pollInterval}`)
+        setTimeout(() => waitForEvents(resolve), pollInterval * 1000)
       }
 
-      log.debug(`No new notifications found, trying again in ${pollInterval}`)
-      setTimeout(() => waitForNotifications(resolve), pollInterval * 1000)
+      if (newEvents.length > 0) {
+        lastEventId = newEvents[0].id
+        log.debug(`Updated lastEventId to ${lastEventId}`)
+      }
     }
   }
 
-  async function getNotifications () {
+  async function getEvents () {
     const headers = {
       'Authorization': `token ${token}`,
-      'If-Modified-Since': formatModifiedHeader(lastModified)
+      'If-None-Match': previousEtag || ''
     }
 
     try {
-      const res = await axios.get(notificationsUrl(), { headers })
+      const url = `https://api.github.com/users/${name}/received_events`
+      const res = await axios.get(url, { headers })
 
       const pollInterval = getPollInterval(res)
-      const lastModifiedResponse = res.headers['last-modified'] || res.headers['date']
+      const etag = res.headers['etag']
 
       return {
-        notifications: res.data,
+        events: res.data,
         pollInterval,
-        lastModifiedResponse
+        etag
       }
     } catch (res) {
       if (res instanceof Error) {
-        log.error('Unable to get notifications from GitHub')
+        log.error('Unable to get events from GitHub')
         throw res
       }
 
       let pollInterval = config.poll.defaultInterval
-      const lastModifiedResponse = res.headers['last-modified'] || res.headers['date']
+      const etag = res.headers['etag']
 
       if (res.status === 304) {
         pollInterval = getPollInterval(res)
@@ -86,61 +91,11 @@ export default function createGithubApi (name, token) {
         log.error(`Got a weird response from GitHub: ${res.status} ${res.statusText}`)
       }
 
-      return { pollInterval, lastModifiedResponse }
+      return { pollInterval, etag }
     }
   }
 
-  async function getEvents () {
-    const headers = {
-      'Authorization': `token ${token}`,
-      'ETag': eventsEtag || ''
-    }
-
-    try {
-      const res = await axios.get(eventsUrl(name), { headers })
-
-      eventsEtag = res.headers['etag']
-      return res.data
-    } catch (res) {
-      if (res instanceof Error) {
-        log.error('Unable to get events from GitHub')
-        throw res
-      }
-
-      if (res.status !== 304) {
-        log.error(`Got a weird response from GitHub: ${res.status} ${res.statusText}`)
-      }
-
-      return []
-    }
-  }
-
-  async function get (url) {
-    const headers = {
-      'Authorization': `token ${token}`
-    }
-
-    log.debug(`Getting ${url}`)
-
-    return (await axios.get(url, { headers })).data
-  }
-
-  async function markAsRead () {
-    const headers = {
-      'Authorization': `token ${token}`
-    }
-
-    log.debug(`Marking notifications as read`)
-
-    try {
-      await axios.put(notificationsUrl(), {}, { headers })
-    } catch (e) {
-      log.error('Unable to mark notifications as read')
-      console.log(e)
-    }
-  }
-
-  return { getNewNotifications, get, markAsRead, getEvents }
+  return { getNewEvents }
 }
 
 function getPollInterval ({ headers }) {
@@ -150,15 +105,4 @@ function getPollInterval ({ headers }) {
     return config.poll.defaultInterval
   }
   return parseInt(interval, 10)
-}
-
-function parseModifiedHeader (header) {
-  return moment.utc(header, 'ddd, DD MMM YYYY HH:mm:ss GMT').valueOf()
-}
-
-function formatModifiedHeader (timestamp) {
-  if (!timestamp) {
-    return ''
-  }
-  return moment.utc(timestamp).format('ddd, DD MMM YYYY HH:mm:ss') + ' GMT'
 }
