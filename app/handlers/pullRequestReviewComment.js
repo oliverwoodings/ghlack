@@ -14,7 +14,7 @@ export default function pullRequestReviewComment ({ payload, repo }) {
     number
   } = payload.pull_request
 
-  const message = `In <${commentUrl}|${path}>:\n\`\`\`${diff_hunk}\`\`\`\n${body}`
+  const message = `_In <${commentUrl}|${path}>:_\n\`\`\`${diff_hunk}\`\`\`\n${body}`
 
   const titleUrl = `${prUrl}/files/${commit_id}#r${id}`
   const title = `*<${titleUrl}|[${repo.name}] ${prTitle} (#${number})>*`

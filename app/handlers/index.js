@@ -1,18 +1,19 @@
 import { each, includes } from 'lodash'
 import createLogger from '../log'
-
 import pullRequestReviewComment from './pullRequestReviewComment'
-//import handleCommitComment from './handleCommitComment'
-//import handleIssueComment from './handleIssueComment'
-//import handlePullRequest from './handlePullRequest'
+import commitComment from './commitComment'
+import issueComment from './issueComment'
+import issue from './issue.js'
+import pullRequest from './pullRequest.js'
 
 const log = createLogger('handleNotifications')
 
 const handlers = {
-  PullRequestReviewCommentEvent: pullRequestReviewComment
-//  CommitComment: handleCommitComment,
-//  IssueComment: handleIssueComment,
-//  PullRequestEvent: handlePullRequest
+  PullRequestReviewCommentEvent: pullRequestReviewComment,
+  CommitCommentEvent: commitComment,
+  IssueCommentEvent: issueComment,
+  IssuesEvent: issue,
+  PullRequestEvent: pullRequest
 }
 
 export default function handleEvents (events, slack) {
@@ -23,7 +24,7 @@ export default function handleEvents (events, slack) {
     log.debug(`Handling event ${event.id} of type ${type}`)
 
     if (!handler) {
-      log.warn(`I don't know how to deal with this type: ${type}`)
+      log.debug(`I don't know how to deal with this type: ${type}`)
       return
     }
 
