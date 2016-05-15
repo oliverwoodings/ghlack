@@ -8,4 +8,6 @@ process.on('unhandledRejection', function (reason) {
   throw reason
 })
 
+console.log('foooobar')
+
 require('./app')
