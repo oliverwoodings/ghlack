@@ -1,7 +1,7 @@
 driftwood:
   enable: false
 poll:
-  eagerInterval: 10
+  eagerInterval: 30
   defaultInterval: 60
 slack:
   username: ghlack
