@@ -7,7 +7,7 @@ slack:
   username: ghlack
   icon: http://i.imgur.com/wDWgbSl.png
 users:
-  # oli:
+  # oliverwoodings:
   #   githubToken: foo
   #   slack:
   #     hook: bar

@@ -1,17 +1,17 @@
 import { each } from 'lodash'
 import handleIssue from './handleIssue'
-import handlePullRequest from './handlePullRequest'
+import handleEntity from './handleEntity'
 import handleCommit from './handleCommit'
 import createLogger from '../log'
 
 const log = createLogger('handleNotifications')
 const handlers = {
-  Issue: handleIssue,
-  PullRequest: handlePullRequest,
+  Issue: handleEntity,
+  PullRequest: handleEntity,
   Commit: handleCommit
 }
 
-export default function handleNotifications (notifications, github, slack) {
+export default function handleNotifications (notifications, events, github, slack) {
   each(notifications, async (notification) => {
     const type = notification.subject.type
     const handler = handlers[type]
@@ -23,7 +23,7 @@ export default function handleNotifications (notifications, github, slack) {
 
     log.debug(`Handling notification ${notification.id} of type ${type}`)
     try {
-      const message = await handler(notification, github)
+      const message = await handler(notification, events, github)
 
       if (message) {
         slack.send(message)

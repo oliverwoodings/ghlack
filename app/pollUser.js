@@ -19,10 +19,11 @@ export default function pollUser (name, config) {
       pollInterval,
       notifications
     } = await github.getNewNotifications()
+    const events = await github.getEvents()
 
     log.debug(`Received notifications for ${name}`)
 
-    handleNotifications(notifications, github, slack)
+    handleNotifications(notifications, events, github, slack)
     github.markAsRead()
 
     setTimeout(poll, pollInterval * 1000)

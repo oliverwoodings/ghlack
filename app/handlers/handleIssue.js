@@ -15,6 +15,7 @@ export default async function handleIssue (notification, github) {
     const issue = await github.get(subject.url)
 
     // if no lastReadAt field, we need to show issue as well
+    // THIS IS WRONG - CHECK LINKS INSTEAD
     if (!lastReadAt) {
       attachments.push(formatIssue(issue))
     }

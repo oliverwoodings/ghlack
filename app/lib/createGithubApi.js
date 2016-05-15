@@ -4,13 +4,15 @@ import invariant from 'invariant'
 import moment from 'moment'
 import axios from 'axios'
 import createLogger from '../log'
-import { notificationsUrl } from '../urls'
+import { notificationsUrl, eventsUrl } from '../urls'
 
 export default function createGithubApi (name, token) {
   invariant(!!token, 'GitHub token required')
 
   const log = createLogger(`githubApi:${name}`)
+
   let lastModified = null
+  let eventsEtag = null
 
   async function getNewNotifications () {
     return new Promise((resolve) => {
@@ -88,6 +90,31 @@ export default function createGithubApi (name, token) {
     }
   }
 
+  async function getEvents () {
+    const headers = {
+      'Authorization': `token ${token}`,
+      'ETag': eventsEtag || ''
+    }
+
+    try {
+      const res = await axios.get(eventsUrl(name), { headers })
+
+      eventsEtag = res.headers['etag']
+      return res.data
+    } catch (res) {
+      if (res instanceof Error) {
+        log.error('Unable to get events from GitHub')
+        throw res
+      }
+
+      if (res.status !== 304) {
+        log.error(`Got a weird response from GitHub: ${res.status} ${res.statusText}`)
+      }
+
+      return []
+    }
+  }
+
   async function get (url) {
     const headers = {
       'Authorization': `token ${token}`
@@ -113,7 +140,7 @@ export default function createGithubApi (name, token) {
     }
   }
 
-  return { getNewNotifications, get, markAsRead }
+  return { getNewNotifications, get, markAsRead, getEvents }
 }
 
 function getPollInterval ({ headers }) {
